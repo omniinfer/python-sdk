@@ -1,0 +1,43 @@
+[project]
+name = "omniinfer_client"
+version = "0.1.0"
+description = "Omniinfer SDK for Python"
+authors = [
+    { name = "Omniinfer", email = "omniinfer@gmail.com" }
+]
+
+[project.urls]
+"Homepage" = "https://github.com/omniinfer/python-sdk"
+"Bug Tracker" = "https://discord.gg/nzqq8UScpx"
+
+dependencies = [
+    "dataclass_wizard>=0.22.2",
+    "requests>=2.27.1",
+]
+
+license = { file = "LICENSE" }
+
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+
+readme = "README.md"
+requires-python = ">= 3.6"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "pytest>=7.0.1",
+    "pytest-dependency>=0.5.1",
+    "build>=0.9.0",
+    "twine>=3.8.0",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
