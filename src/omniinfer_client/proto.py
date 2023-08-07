@@ -154,6 +154,12 @@ class Txt2ImgResponseCode(Enum):
     SAMPLER_NOT_EXISTS = 8
     TIMEOUT = 9
 
+    UNKNOWN = 100
+
+    @classmethod
+    def _missing_(cls, number):
+        return cls(cls.UNKNOWN)
+
 
 @dataclass
 class Txt2ImgResponseData(JSONe):
@@ -213,6 +219,12 @@ class Img2ImgResponseCode(Enum):
     SAMPLER_NOT_EXISTS = 8
     TIMEOUT = 9
 
+    UNKNOWN = 100
+
+    @classmethod
+    def _missing_(cls, number):
+        return cls(cls.UNKNOWN)
+
 
 @dataclass
 class Img2ImgResponseData(JSONe):
@@ -235,6 +247,12 @@ class ProgressResponseStatusCode(Enum):
     SUCCESSFUL = 2
     FAILED = 3
     TIMEOUT = 4
+
+    UNKNOWN = 100
+
+    @classmethod
+    def _missing_(cls, number):
+        return cls(cls.UNKNOWN)
 
     def finished(self):
         return self in (ProgressResponseStatusCode.SUCCESSFUL, ProgressResponseStatusCode.FAILED, ProgressResponseStatusCode.TIMEOUT)
@@ -269,6 +287,12 @@ class ProgressResponseCode(Enum):
     SAMPLER_NOT_EXISTS = 8
     TIMEOUT = 9
 
+    UNKNOWN = 100
+
+    @classmethod
+    def _missing_(cls, number):
+        return cls(cls.UNKNOWN)
+
 
 @dataclass
 class ProgressResponse(JSONe):
@@ -283,12 +307,20 @@ class ProgressResponse(JSONe):
 
 # --------------- Model ---------------
 
+
 class ModelType(Enum):
     CHECKPOINT = "checkpoint"
     LORA = "lora"
     VAE = "vae"
     CONTROLNET = "controlnet"
     TEXT_INVERSION = "textualinversion"
+    UPSCALER = "upscaler"
+
+    UNKNOWN = "unknown"
+
+    @classmethod
+    def _missing_(cls, number):
+        return cls(cls.UNKNOWN)
 
 
 @dataclass

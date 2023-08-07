@@ -1,14 +1,11 @@
 [project]
 name = "omniinfer_client"
-version = "0.1.0"
+version = "0.2.0"
 description = "Omniinfer SDK for Python"
 authors = [
     { name = "Omniinfer", email = "omniinfer@gmail.com" }
 ]
 
-[project.urls]
-"Homepage" = "https://github.com/omniinfer/python-sdk"
-"Bug Tracker" = "https://discord.gg/nzqq8UScpx"
 
 dependencies = [
     "dataclass_wizard>=0.22.2",
@@ -25,6 +22,10 @@ classifiers = [
 
 readme = "README.md"
 requires-python = ">= 3.6"
+
+[project.urls]
+"Homepage" = "https://github.com/omniinfer/python-sdk"
+"Bug Tracker" = "https://discord.gg/nzqq8UScpx"
 
 [build-system]
 requires = ["hatchling"]

@@ -1,8 +1,9 @@
 build:
-	@python -m build
+	@python3 -m build
 
-upload: build
+upload: 
 	@python3 -m twine upload dist/*
+	@rm -rf dist
 
 docs:
 	@cd docs && make html
