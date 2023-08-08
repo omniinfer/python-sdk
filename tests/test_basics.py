@@ -235,6 +235,7 @@ def test_upscale_specify_size():
     img = Image.open(io.BytesIO(upscale_res.data.imgs_bytes[0]))
     assert img.size == (768, 768)
 
+
 def test_upscale_multiple_upscaler():
     client = OmniClient(os.getenv('OMNI_API_KEY'))
     res = client.sync_img2img(Img2ImgRequest(
@@ -265,3 +266,21 @@ def test_upscale_multiple_upscaler():
     assert (len(upscale_res.data.imgs_bytes) == 1)
     img = Image.open(io.BytesIO(upscale_res.data.imgs_bytes[0]))
     assert img.size == (768, 768)
+
+
+def test_txt2img_custom_headers():
+    client = OmniClient(os.getenv('OMNI_API_KEY'))
+    client.set_extra_headers({"User-Agent": "test-custom-user-agent"})
+
+    res = client.sync_img2img(Img2ImgRequest(
+        model_name='dreamshaper_8_93211.safetensors',
+        prompt='a dog flying in the sky',
+        width=512,
+        height=512,
+        batch_size=1,
+        cfg_scale=7.5,
+        sampler_name=Samplers.EULER_A,
+    ))
+
+    assert (res.data.status == ProgressResponseStatusCode.SUCCESSFUL)
+    assert (len(res.data.imgs_bytes) == 1)

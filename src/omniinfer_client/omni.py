@@ -30,6 +30,10 @@ class OmniClient:
 
         # eg: {"all": [proto.ModelInfo], "checkpoint": [proto.ModelInfo], "lora": [proto.ModelInfo]}
         self._model_list_cache = None
+        self._extra_headers = {}
+
+    def set_extra_headers(self, headers: dict):
+        self._extra_headers = headers
 
     def _get(self, api_path, params=None) -> dict:
         headers = {
@@ -39,6 +43,7 @@ class OmniClient:
             'User-Agent': "omniinfer-python-sdk/{}".format(__version__),
             'Accept-Encoding': 'gzip, deflate',
         }
+        headers.update(self._extra_headers)
 
         logger.debug(f"[GET] params: {params}")
 
@@ -65,6 +70,7 @@ class OmniClient:
             'User-Agent': "omniinfer-python-sdk/{}".format(__version__),
             'Accept-Encoding': 'gzip, deflate',
         }
+        headers.update(self._extra_headers)
 
         logger.debug(f"[POST] data: {data}")
 
@@ -203,7 +209,7 @@ class OmniClient:
         if download_images:
             res.download_images()
         return res
-    
+
     def sync_upscale(self, request: UpscaleRequest, download_images=True) -> ProgressResponse:
         """Syncronously upscale image from request, optionally download images
 
@@ -238,8 +244,6 @@ class OmniClient:
         response = self._post('/upscale', request.to_dict())
 
         return UpscaleResponse.from_dict(response)
-
-
 
     def models(self, refresh=False) -> ModelList:
         """Get list of models
