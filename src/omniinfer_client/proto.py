@@ -136,9 +136,15 @@ class Txt2ImgRequest(JSONe):
     width: int = 512
     seed: Optional[int] = -1
     restore_faces: Optional[bool] = False
-    sd_vae: Optional[str] = "Automatic"
+    sd_vae: Optional[str] = None
     clip_skip: Optional[int] = 1
     controlnet_units: Optional[List[ControlnetUnit]] = None
+
+    enable_hr: Optional[bool] = False
+    hr_upscaler: Optional[str] = 'R-ESRGAN 4x+'
+    hr_scale: Optional[float] = 2.0
+    hr_resize_x: Optional[int] = None
+    hr_resize_y: Optional[int] = None
 
 
 class Txt2ImgResponseCode(Enum):
@@ -201,7 +207,7 @@ class Img2ImgRequest(JSONe):
     width: Optional[int] = 1024
     height: Optional[int] = 1024
     restore_faces: Optional[bool] = False
-    sd_vae: Optional[str] = "Automatic"
+    sd_vae: Optional[str] = None
     clip_skip: Optional[int] = 1
     controlnet_units: Optional[List[ControlnetUnit]] = None
 
@@ -303,6 +309,62 @@ class ProgressResponse(JSONe):
     def download_images(self):
         if self.data.imgs is not None and len(self.data.imgs) > 0:
             self.data.imgs_bytes = batch_download_images(self.data.imgs)
+
+# --------------- Upscale ---------------
+
+
+class UpscaleResizeMode(Enum):
+    SCALE = 0
+    SIZE = 1
+
+@dataclass
+class UpscaleRequest(JSONe):
+    image: str
+    upscaler_1: Optional[str] = 'R-ESRGAN 4x+'
+    resize_mode: Optional[UpscaleResizeMode] = UpscaleResizeMode.SCALE
+    upscaling_resize: Optional[float] = 2.0
+    upscaling_resize_w: Optional[int] = None
+    upscaling_resize_h: Optional[int] = None
+    upscaling_crop: Optional[bool] = False
+
+    upscaler_2: Optional[str] = None
+    extras_upscaler_2_visibility: Optional[float] = None
+    gfpgan_visibility: Optional[float] = None
+    codeformer_visibility: Optional[float] = None
+    codeformer_weight: Optional[float] = None
+
+
+class UpscaleResponseCode(Enum):
+    NORMAL = 0
+    INTERNAL_ERROR = -1
+    INVALID_JSON = 1
+    MODEL_NOT_EXISTS = 2
+    TASK_ID_NOT_EXISTS = 3
+    INVALID_AUTH = 4
+    HOST_UNAVAILABLE = 5
+    PARAM_RANGE_ERROR = 6
+    COST_BALANCE_ERROR = 7
+    SAMPLER_NOT_EXISTS = 8
+    TIMEOUT = 9
+
+    UNKNOWN = 100
+
+    @classmethod
+    def _missing_(cls, number):
+        return cls(cls.UNKNOWN)
+
+
+@dataclass
+class UpscaleResponseData(JSONe):
+    task_id: str
+    warn: Optional[str] = None
+
+
+@dataclass
+class UpscaleResponse(JSONe):
+    code: UpscaleResponseCode
+    msg: str
+    data: Optional[UpscaleResponseData] = None
 
 
 # --------------- Model ---------------
