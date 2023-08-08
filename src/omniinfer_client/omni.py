@@ -87,23 +87,23 @@ class OmniClient:
         """Asynchronously generate images from request
 
         Args:
-            request (Txt2ImgRequest)
+            request (Txt2ImgRequest): The request object containing the text and image generation parameters.
 
         Returns:
-            Txt2ImgResponse
+            Txt2ImgResponse: The response object containing the task ID and status URL.
         """
         response = self._post('/txt2img', request.to_dict())
 
         return Txt2ImgResponse.from_dict(response)
 
     def progress(self, task_id: str) -> ProgressResponse:
-        """Progress of a task
+        """Get the progress of a task.
 
         Args:
-            task_id (str)
+            task_id (str): The ID of the task to get the progress for.
 
         Returns:
-            ProgressResponse
+            ProgressResponse: The response object containing the progress information for the task.
         """
         response = self._get('/progress', {
             'task_id': task_id,
@@ -115,10 +115,10 @@ class OmniClient:
         """Asynchronously generate images from request
 
         Args:
-            request (Img2ImgRequest): _description_
+            request (Img2ImgRequest): The request object containing the image and image generation parameters.
 
         Returns:
-            Img2ImgResponse: _description_
+            Img2ImgResponse: The response object containing the task ID and status URL.
         """
         response = self._post('/img2img', request.to_dict())
 
@@ -127,15 +127,17 @@ class OmniClient:
     def wait_for_task(self, task_id, wait_for=300) -> ProgressResponse:
         """Wait for a task to complete
 
+        This method waits for a task to complete by periodically checking its progress. If the task is not completed within the specified time, an OmniTimeoutError is raised.
+
         Args:
-            task_id (_type_): _description_
-            wait_for (int, optional): _description_. Defaults to 300.
+            task_id (_type_): The ID of the task to wait for.
+            wait_for (int, optional): The maximum time to wait for the task to complete, in seconds. Defaults to 300.
 
         Raises:
-            OmniTimeoutError: _description_
+            OmniTimeoutError: If the task fails to complete within the specified time.
 
         Returns:
-            ProgressResponse: _description_
+            ProgressResponse: The response object containing the progress information for the task.
         """
         i = 0
 
@@ -151,7 +153,7 @@ class OmniClient:
                 logger.info(f"Task {task_id} completed")
                 return progress
 
-            sleep(1)
+            sleep(settings.DEFAULT_POLL_INTERVAL)
             i += 1
 
         raise OmniTimeoutError(
@@ -160,17 +162,22 @@ class OmniClient:
     def sync_txt2img(self, request: Txt2ImgRequest, download_images=True) -> ProgressResponse:
         """Synchronously generate images from request, optionally download images
 
+        This method generates images synchronously from the given request object. If download_images is set to True, the generated images will be downloaded.
+
         Args:
-            request (Txt2ImgRequest): _description_
-            download_images (bool, optional): _description_. Defaults to True.
+            request (Txt2ImgRequest): The request object containing the input text and other parameters.
+            download_images (bool, optional): Whether to download the generated images. Defaults to True.
+
+        Raises:
+            OmniResponseError: If the text to image generation fails.
 
         Returns:
-            ProgressResponse: _description_
+            ProgressResponse: The response object containing the task status and generated images.
         """
         response = self.txt2img(request)
 
         if response.data is None:
-            return OmniResponseError(f"Text to Image generation failed with response {response.msg}, code: {response.code}")
+            raise OmniResponseError(f"Text to Image generation failed with response {response.msg}, code: {response.code}")
 
         res = self.wait_for_task(response.data.task_id)
         if download_images:
@@ -178,33 +185,75 @@ class OmniClient:
         return res
 
     def sync_img2img(self, request: Img2ImgRequest, download_images=True) -> ProgressResponse:
-        """Syncronously generate images from request, optionally download images
+        """Synchronously generate images from request, optionally download images
 
         Args:
-            request (Img2ImgRequest): _description_
+            request (Img2ImgRequest): The request object containing the input image and other parameters.
+            download_images (bool, optional): Whether to download the generated images. Defaults to True.
+
+        Returns:
+            ProgressResponse: The response object containing the task status and generated images.
+        """
+        response = self.img2img(request)
+
+        if response.data is None:
+            raise OmniResponseError(f"Image to Image generation failed with response {response.msg}, code: {response.code}")
+
+        res = self.wait_for_task(response.data.task_id)
+        if download_images:
+            res.download_images()
+        return res
+    
+    def sync_upscale(self, request: UpscaleRequest, download_images=True) -> ProgressResponse:
+        """Syncronously upscale image from request, optionally download images
+
+        Args:
+            request (UpscaleRequest): _description_
             download_images (bool, optional): _description_. Defaults to True.
 
         Returns:
             ProgressResponse: _description_
         """
-        response = self.img2img(request)
+        response = self.upscale(request)
 
         if response.data is None:
-            return OmniResponseError(f"Image to Image generation failed with response {response.msg}, code: {response.code}")
+            raise OmniResponseError(f"Upscale failed with response {response.msg}, code: {response.code}")
 
         res = self.wait_for_task(response.data.task_id)
         if download_images:
             res.download_images()
         return res
 
+    def upscale(self, request: UpscaleRequest) -> UpscaleResponse:
+        """Upscale image
+
+        This method sends a request to the Omni API to upscale an image using the specified parameters.
+
+        Args:
+            request (UpscaleRequest): An object containing the input image and other parameters.
+
+        Returns:
+            UpscaleResponse: An object containing the task status and the URL of the upscaled image.
+        """
+        response = self._post('/upscale', request.to_dict())
+
+        return UpscaleResponse.from_dict(response)
+
+
+
     def models(self, refresh=False) -> ModelList:
         """Get list of models
 
+        This method retrieves a list of models available in the Omni API. If the list has already been retrieved and
+        `refresh` is False, the cached list will be returned. Otherwise, a new request will be made to the API to
+        retrieve the list.
+
         Args:
-            refresh (bool, optional): _description_. Defaults to False.
+            refresh (bool, optional): If True, a new request will be made to the API to retrieve the list of models.
+                If False and the list has already been retrieved, the cached list will be returned. Defaults to False.
 
         Returns:
-            ModelList: _description_
+            ModelList: A list of models available in the Omni API.
         """
 
         if (self._model_list_cache is None or len(self._model_list_cache) == 0) or refresh:

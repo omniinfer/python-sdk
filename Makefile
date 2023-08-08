@@ -1,8 +1,8 @@
 build:
-	@python3 -m build
+	@.venv/bin/python3 -m build
 
-upload: 
-	@python3 -m twine upload dist/*
+upload: build
+	@.venv/bin/python3 -m twine upload dist/*
 	@rm -rf dist
 
 docs:
