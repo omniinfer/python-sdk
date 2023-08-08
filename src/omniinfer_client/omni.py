@@ -130,7 +130,7 @@ class OmniClient:
 
         return Img2ImgResponse.from_dict(response)
 
-    def wait_for_task(self, task_id, wait_for=300) -> ProgressResponse:
+    def wait_for_task(self, task_id, wait_for: int = 300, callback: callable = None) -> ProgressResponse:
         """Wait for a task to complete
 
         This method waits for a task to complete by periodically checking its progress. If the task is not completed within the specified time, an OmniTimeoutError is raised.
@@ -152,6 +152,12 @@ class OmniClient:
 
             progress = self.progress(task_id)
 
+            if callback and callable(callback):
+                try:
+                    callback(progress)
+                except Exception as e:
+                    logger.error(f"Task {task_id} progress callback failed: {e}")
+
             logger.info(
                 f"Task {task_id} progress eta_relative: {progress.data.eta_relative}")
 
@@ -165,7 +171,7 @@ class OmniClient:
         raise OmniTimeoutError(
             f"Task {task_id} failed to complete in {wait_for} seconds")
 
-    def sync_txt2img(self, request: Txt2ImgRequest, download_images=True) -> ProgressResponse:
+    def sync_txt2img(self, request: Txt2ImgRequest, download_images=True, callback: callable = None) -> ProgressResponse:
         """Synchronously generate images from request, optionally download images
 
         This method generates images synchronously from the given request object. If download_images is set to True, the generated images will be downloaded.
@@ -185,12 +191,12 @@ class OmniClient:
         if response.data is None:
             raise OmniResponseError(f"Text to Image generation failed with response {response.msg}, code: {response.code}")
 
-        res = self.wait_for_task(response.data.task_id)
+        res = self.wait_for_task(response.data.task_id, callback=callback)
         if download_images:
             res.download_images()
         return res
 
-    def sync_img2img(self, request: Img2ImgRequest, download_images=True) -> ProgressResponse:
+    def sync_img2img(self, request: Img2ImgRequest, download_images=True, callback: callable = None) -> ProgressResponse:
         """Synchronously generate images from request, optionally download images
 
         Args:
@@ -205,12 +211,12 @@ class OmniClient:
         if response.data is None:
             raise OmniResponseError(f"Image to Image generation failed with response {response.msg}, code: {response.code}")
 
-        res = self.wait_for_task(response.data.task_id)
+        res = self.wait_for_task(response.data.task_id, callback=callback)
         if download_images:
             res.download_images()
         return res
 
-    def sync_upscale(self, request: UpscaleRequest, download_images=True) -> ProgressResponse:
+    def sync_upscale(self, request: UpscaleRequest, download_images=True, callback: callable = None) -> ProgressResponse:
         """Syncronously upscale image from request, optionally download images
 
         Args:
@@ -225,7 +231,7 @@ class OmniClient:
         if response.data is None:
             raise OmniResponseError(f"Upscale failed with response {response.msg}, code: {response.code}")
 
-        res = self.wait_for_task(response.data.task_id)
+        res = self.wait_for_task(response.data.task_id, callback=callback)
         if download_images:
             res.download_images()
         return res

@@ -284,3 +284,23 @@ def test_txt2img_custom_headers():
 
     assert (res.data.status == ProgressResponseStatusCode.SUCCESSFUL)
     assert (len(res.data.imgs_bytes) == 1)
+
+
+def test_txt2img_with_callback():
+    client = OmniClient(os.getenv('OMNI_API_KEY'))
+
+    def callback(res: ProgressResponse):
+        assert isinstance(res.data.progress, float)
+
+    res = client.sync_txt2img(Txt2ImgRequest(
+        model_name='dreamshaper_8_93211.safetensors',
+        prompt='a dog flying in the sky',
+        width=512,
+        height=512,
+        batch_size=1,
+        cfg_scale=7.5,
+        sampler_name=Samplers.EULER_A,
+    ), callback=callback)
+
+    assert (res.data.status == ProgressResponseStatusCode.SUCCESSFUL)
+    assert (len(res.data.imgs_bytes) == 1)

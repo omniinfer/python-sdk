@@ -303,7 +303,7 @@ class ProgressResponseCode(Enum):
 @dataclass
 class ProgressResponse(JSONe):
     code: ProgressResponseCode
-    data: ProgressData
+    data: Optional[ProgressData] = None
     msg: Optional[str] = ""
 
     def download_images(self):
@@ -316,6 +316,7 @@ class ProgressResponse(JSONe):
 class UpscaleResizeMode(Enum):
     SCALE = 0
     SIZE = 1
+
 
 @dataclass
 class UpscaleRequest(JSONe):
