@@ -21,7 +21,7 @@ class OmniClient:
     """OmniClient is the main entry point for interacting with the Omni API."""
 
     def __init__(self, api_key):
-        self.base_url = "http://api.omniinfer.io/v2"
+        self.base_url = "https://api.omniinfer.io/v2"
         self.api_key = api_key
         self.session = requests.Session()
 
