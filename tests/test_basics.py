@@ -304,3 +304,75 @@ def test_txt2img_with_callback():
 
     assert (res.data.status == ProgressResponseStatusCode.SUCCESSFUL)
     assert (len(res.data.imgs_bytes) == 1)
+
+
+def test_txt2img_sdxl_with_refiner():
+    client = OmniClient(os.getenv('OMNI_API_KEY'))
+    res = client.sync_txt2img(Txt2ImgRequest(
+        model_name='sd_xl_base_1.0.safetensors',
+        prompt='a dog flying in the sky',
+        width=1024,
+        height=1024,
+        batch_size=1,
+        cfg_scale=7.5,
+        sampler_name=Samplers.EULER_A,
+        sd_refiner=Refiner(
+            checkpoint='sd_xl_refiner_1.0.safetensors',
+            switch_at=0.5,
+        )
+    ))
+
+    assert (res.data.status == ProgressResponseStatusCode.SUCCESSFUL)
+    assert (len(res.data.imgs_bytes) == 1)
+
+    test_path = os.path.join(os.path.abspath(
+        os.path.dirname(__name__)), "tests/data")
+    if not os.path.exists(test_path):
+        os.makedirs(test_path)
+    save_image(res.data.imgs_bytes[0], os.path.join(
+        test_path, 'test_sdxl_txt2img_refienr.png'))
+
+
+def test_img2img_sdxl_with_refiner():
+    client = OmniClient(os.getenv('OMNI_API_KEY'))
+    res = client.sync_txt2img(Txt2ImgRequest(
+        model_name='sd_xl_base_1.0.safetensors',
+        prompt='a dog flying in the sky',
+        width=1024,
+        height=1024,
+        batch_size=1,
+        cfg_scale=7.5,
+        sampler_name=Samplers.EULER_A,
+        sd_refiner=Refiner(
+            checkpoint='sd_xl_refiner_1.0.safetensors',
+            switch_at=0.5,
+        )
+    ))
+
+    assert (res.data.status == ProgressResponseStatusCode.SUCCESSFUL)
+    assert (len(res.data.imgs_bytes) == 1)
+
+    base64_image = base64.b64encode(res.data.imgs_bytes[0]).decode('utf-8')
+
+    res = client.sync_img2img(Img2ImgRequest(
+        prompt='a dog flying in the sky',
+        model_name='sd_xl_base_1.0.safetensors',
+        batch_size=1,
+        cfg_scale=7.5,
+        sampler_name=Samplers.EULER_A,
+        init_images=[base64_image],
+        sd_refiner=Refiner(
+            checkpoint='sd_xl_refiner_1.0.safetensors',
+            switch_at=0.5,
+        )
+    ))
+
+    assert (res.data.status == ProgressResponseStatusCode.SUCCESSFUL)
+    assert (len(res.data.imgs_bytes) == 1)
+
+    test_path = os.path.join(os.path.abspath(
+        os.path.dirname(__name__)), "tests/data")
+    if not os.path.exists(test_path):
+        os.makedirs(test_path)
+    save_image(res.data.imgs_bytes[0], os.path.join(
+        test_path, 'test_sdxl_img2img_refienr.png'))

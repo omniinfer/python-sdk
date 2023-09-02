@@ -119,6 +119,12 @@ class Samplers:
     UNIPC = 'UniPC'
 
 
+# --------------- Refiner ---------------
+@dataclass
+class Refiner:
+    checkpoint: str
+    switch_at: float
+
 # --------------- Text2Image ---------------
 
 
@@ -134,17 +140,22 @@ class Txt2ImgRequest(JSONe):
     cfg_scale: float = 7
     height: int = 512
     width: int = 512
+
     seed: Optional[int] = -1
     restore_faces: Optional[bool] = False
     sd_vae: Optional[str] = None
     clip_skip: Optional[int] = 1
+
     controlnet_units: Optional[List[ControlnetUnit]] = None
+    control_net_no_detectmap: Optional[bool] = False
 
     enable_hr: Optional[bool] = False
     hr_upscaler: Optional[str] = 'R-ESRGAN 4x+'
     hr_scale: Optional[float] = 2.0
     hr_resize_x: Optional[int] = None
     hr_resize_y: Optional[int] = None
+
+    sd_refiner: Optional[Refiner] = None
 
 
 class Txt2ImgResponseCode(Enum):
@@ -209,7 +220,11 @@ class Img2ImgRequest(JSONe):
     restore_faces: Optional[bool] = False
     sd_vae: Optional[str] = None
     clip_skip: Optional[int] = 1
+
     controlnet_units: Optional[List[ControlnetUnit]] = None
+    control_net_no_detectmap: Optional[bool] = False
+
+    sd_refiner: Optional[Refiner] = None
 
 
 class Img2ImgResponseCode(Enum):

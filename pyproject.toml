@@ -1,6 +1,6 @@
 [project]
 name = "omniinfer_client"
-version = "0.3.3"
+version = "0.3.4"
 description = "Omniinfer SDK for Python"
 authors = [
     { name = "Omniinfer", email = "omniinfer@gmail.com" }
