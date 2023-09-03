@@ -147,7 +147,7 @@ class Txt2ImgRequest(JSONe):
     clip_skip: Optional[int] = 1
 
     controlnet_units: Optional[List[ControlnetUnit]] = None
-    control_net_no_detectmap: Optional[bool] = False
+    controlnet_no_detectmap: Optional[bool] = False
 
     enable_hr: Optional[bool] = False
     hr_upscaler: Optional[str] = 'R-ESRGAN 4x+'
@@ -222,7 +222,7 @@ class Img2ImgRequest(JSONe):
     clip_skip: Optional[int] = 1
 
     controlnet_units: Optional[List[ControlnetUnit]] = None
-    control_net_no_detectmap: Optional[bool] = False
+    controlnet_no_detectmap: Optional[bool] = False
 
     sd_refiner: Optional[Refiner] = None
 
